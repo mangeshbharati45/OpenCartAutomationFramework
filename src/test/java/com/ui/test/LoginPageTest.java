@@ -26,7 +26,7 @@ public class LoginPageTest extends BaseTest {
 		loginPage = homePage.goToLogin();
 	}
 	
-	@Description("checking open cart login page url...")
+	@Description("checking open cart login page url")
 	@Severity(SeverityLevel.NORMAL)
 	@Owner("Mangesh")
 	@Test(description = "Checking login Page Functionality")

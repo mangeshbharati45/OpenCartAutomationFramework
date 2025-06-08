@@ -31,19 +31,19 @@
 		</classes>
 	</test>
 	
-	<!--<test name="Register Page Test">
+	<test name="Register Page Test">
 		<parameter name="browser" value="chrome" />
 		<classes>
 			<class name="com.ui.test.RegisterPageTest" />
 		</classes>
-	</test>-->
+	</test>
 
-	<!--<test name="Product Details Page Test">
+	<test name="Product Details Page Test">
 		<parameter name="browser" value="chrome" />
 		<classes>
 			<class name="com.ui.test.ProductDetailsPageTest" />
 		</classes>
-	</test>-->
+	</test>
 
 
 </suite>	

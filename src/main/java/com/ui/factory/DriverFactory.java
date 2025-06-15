@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
@@ -14,6 +16,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 import com.ui.exceptions.FrameworkException;
 import com.ui.factory.DriverFactory;
@@ -24,12 +27,12 @@ public class DriverFactory {
 	WebDriver driver;
 	Properties prop;
 	OptionsManager optionsManager;
-	public static ThreadLocal<WebDriver> tlDriver = new ThreadLocal<WebDriver>();	
+	public static ThreadLocal<WebDriver> tlDriver = new ThreadLocal<WebDriver>();
 	public static String highlight;
-	
+
 	private static final Logger log = LogManager.getLogger(DriverFactory.class);
 
-	//warn, info, error, fatal
+	// warn, info, error, fatal
 
 	public WebDriver initDriver(Properties prop) {
 
@@ -43,16 +46,47 @@ public class DriverFactory {
 
 		switch (browserName.toLowerCase().trim()) {
 		case "chrome":
-			tlDriver.set(new ChromeDriver(optionsManager.getChromeOptions()));
+			if (Boolean.parseBoolean(prop.getProperty("remote"))) {
+				// run on remote/selenium grid server/aws/machine
+				try {
+					tlDriver.set(new RemoteWebDriver(new URL(prop.getProperty("huburl")),
+							optionsManager.getChromeOptions()));
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+			} else {
+				// run it on local:
+				tlDriver.set(new ChromeDriver(optionsManager.getChromeOptions()));
+			}
 			break;
 		case "edge":
-			tlDriver.set(new EdgeDriver(optionsManager.getEdgeOptions()));
+			if (Boolean.parseBoolean(prop.getProperty("remote"))) {
+				// run on remote/selenium grid server/aws/machine
+				try {
+					tlDriver.set(
+							new RemoteWebDriver(new URL(prop.getProperty("huburl")), optionsManager.getEdgeOptions()));
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+			} else {
+				tlDriver.set(new EdgeDriver(optionsManager.getEdgeOptions()));
+			}
 			break;
 		case "firefox":
-			tlDriver.set(new FirefoxDriver(optionsManager.getFirefoxOptions()));
+			if (Boolean.parseBoolean(prop.getProperty("remote"))) {
+				try {
+					tlDriver.set(
+							new RemoteWebDriver(new URL(prop.getProperty("huburl")), optionsManager.getFirefoxOptions()));
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+			} else {
+
+				tlDriver.set(new FirefoxDriver(optionsManager.getFirefoxOptions()));
+			}
 			break;
 		default:
-			log.error("Please provide the correct browser: "+ browserName);
+			log.error("Please provide the correct browser: " + browserName);
 			throw new BrowserException("== Invalid Browser==");
 		}
 
@@ -65,9 +99,10 @@ public class DriverFactory {
 
 	/**
 	 * getDriver: get the local thread copy of the driver
-	 * @return 
+	 * 
+	 * @return
 	 */
-	
+
 	public static WebDriver getDriver() {
 		return tlDriver.get();
 	}
@@ -126,7 +161,7 @@ public class DriverFactory {
 		File srcFile = ((TakesScreenshot) getDriver()).getScreenshotAs(OutputType.FILE);// temp dir
 		return srcFile;
 	}
-	
+
 	public static byte[] getScreenshotByte() {
 		return ((TakesScreenshot) getDriver()).getScreenshotAs(OutputType.BYTES);// temp dir
 
